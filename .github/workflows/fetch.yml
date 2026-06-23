@@ -1,0 +1,24 @@
+name: Fetch Ondotori Data
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: fetch
+        env:
+          API_KEY: ${{ secrets.ONDOTORI_API_KEY }}
+          LOGIN_ID: ${{ secrets.ONDOTORI_LOGIN_ID }}
+          LOGIN_PASS: ${{ secrets.ONDOTORI_LOGIN_PASS }}
+        run: |
+          python3 fetch_data.py
+      - name: push
+        run: |
+          git config user.email "bot@github.com"
+          git config user.name "GitHub Actions"
+          git add data.json
+          git diff --cached --quiet || git commit -m "Update sensor data"
+          git push
